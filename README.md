@@ -60,7 +60,8 @@ The result is `build/picocalc-virtualt.uf2`; copy it to the card as
 
 BSD 2-Clause for the port ([LICENSE](LICENSE)); BSD for the VirtualT core
 ([LICENSE-VirtualT.txt](LICENSE-VirtualT.txt)); Blair Leduc's submodules and
-the included programs keep their own terms.
+the included programs keep their own terms. [THIRD-PARTY.md](THIRD-PARTY.md)
+lists everything taken from elsewhere, with its licence.
 
 ## Credits
 
