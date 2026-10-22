@@ -1,0 +1,7 @@
+1 '2026: the player program from CHIME.200; run MKCHIM first to make CHIME.CO
+10 INPUT "Pitch";P
+20 INPUT "Duration";D
+30 LOADM "chime"
+35 S=63577
+40 CALL S,,P+D*256
+70 GOTO 10

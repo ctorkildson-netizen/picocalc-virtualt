@@ -1,0 +1,449 @@
+VirtualT for PicoCalc -- TRS-80 Model 100 / Tandy 200 emulator
+==============================================================
+(Best read in a fixed-width font, such as Consolas or Courier
+New in Notepad: Format > Font.)
+
+Alpha release.
+
+WHAT THIS IS
+------------
+The TRS-80 Model 100 (Radio Shack, 1983) was one of the first
+notebook computers: a full keyboard, an 8-line 40-column LCD
+and 20 hours on four AA batteries, with BASIC, a text editor,
+a terminal program, an address book and a scheduler built in.
+It runs on an 80C85 at 2.4 MHz with up to 32K of memory. Its
+BASIC was one of the last programs Bill Gates wrote much of
+himself. Journalists filed stories from it for years, and a
+large hobby library of programs grew up around it, much of it
+still online. The Tandy 200 (1985) is its flip-top sibling
+with a 16-line screen and Multiplan, Microsoft's spreadsheet
+before Excel, built in.
+
+VirtualT is the emulator of those machines for Windows, Mac
+and Linux, by Ken Pettit and contributors
+(virtualt.sourceforge.net). This is VirtualT's emulation core
+on the PicoCalc: the real Model 100 ROM runs at the real
+machine's speed, with the PicoCalc's screen, keyboard, sound
+and SD card standing in for the Model 100's.
+
+REQUIREMENTS
+------------
+- A PicoCalc with an RP2350 module: a Pico 2 or a Pico 2 W.
+  (The original RP2040 Pico is not supported.)
+- The uf2loader SD-card boot menu.
+- Your own Model 100 ROM image (see INSTALL), and for the
+  Model 200, your own Model 200 ROM image.
+
+The Pico 2 W (RP2350W) is needed only for setting the clock
+automatically over WiFi. On a plain Pico 2, leave ssid out of
+virtualt.cfg (or skip the file); the clock then carries on
+from the last time saved, and everything else is the same.
+The plain Pico 2 has not been tested yet.
+
+
+INSTALL
+-------
+1. Copy virtualt.uf2 into the pico2-apps folder on the SD card.
+2. Make a folder called virtualt at the top of the SD card.
+3. Put your own Model 100 ROM image in virtualt/, named
+   M100ROM.BIN (exactly 32768 bytes). The ROM is Microsoft's
+   copyright and is not included. If you have VirtualT for
+   the PC installed (virtualt.sourceforge.net), its ROMs
+   folder holds images in exactly the form this one uses:
+   copy M100rom.bin from there.
+4. Optional, for the Tandy 200: put its ROM image in
+   virtualt/ too, named T200ROM.BIN (73728 bytes -- the main
+   ROM followed by Multiplan, as VirtualT uses it). The PC
+   VirtualT's T200rom.bin is that file.
+5. Copy the m100 and m200 folders from the download into
+   virtualt/: 55 tested programs (see PROGRAMS.TXT), your
+   libraries to start with. Optional: copy virtualt.cfg
+   there too (see SETTINGS).
+6. Pick VirtualT from the boot menu.
+
+
+QUICK START: RUNNING A PROGRAM
+------------------------------
+A typical session, from a downloaded program to playing it:
+
+1. Pick a program. The ones that come with VirtualT are already
+   in the library (PROGRAMS.TXT says what they are); skip to 3.
+   For more, Club 100 (club100.org) has thousands, most of them
+   plain-text listings named .BA, .100 or .200, often with a
+   .DOC beside them.
+2. Put it on the SD card: virtualt/m100 for a Model 100 program,
+   virtualt/m200 for a Tandy 200 one. Use a card reader, or an
+   FTP app on the PicoCalc if you have one. Copy any .DO or
+   .DOC file that comes with it too. Names are cut to 6
+   letters on the Model 100 (STARFIGHT.BA loads as STARFI.BA).
+3. Start VirtualT from the boot menu. During the countdown
+   under the screen, press Enter (or just wait 3 seconds) for
+   the Model 100, or press 2 for the Model 200.
+4. At the Model 100's main menu, press Ctrl+F4. The library
+   opens under the screen. Up / Down to the program, Enter to
+   load it ("loaded" appears). Load its .DO / .DOC the same way
+   if it has one. Press Esc to close the library; the menu is
+   redrawn with the new file on it.
+5. Run it: arrow keys to its name on the menu, Enter. (Or, in
+   BASIC, type RUN "NAME".) Many 1980s programs expect capital
+   letters -- if one ignores your Y or N, press Caps Lock (CAPS
+   lights on the top line). Check PROGRAMS.TXT for its keys.
+6. To stop a program: its own quit key (often F8), or Shift+Esc
+   (BREAK) and then F8 or MENU to get back to the menu.
+7. A Model 100 has about 29K free. To make room, go to the main menu,
+   press Ctrl+F4, Tab (the files in RAM), choose one, Del, Y.
+   The copy on the card stays.
+8. When you're done, Ctrl+Esc saves memory and goes back to the
+   SD menu. What you loaded is still there next time; you only
+   need the library again for new programs.
+
+
+WHERE THINGS LIVE
+-----------------
+Two places matter, like a bookshelf and a desk:
+  The SD card is the bookshelf: the library (virtualt/m100,
+  m200) holds every program you have.
+  The Model 100's memory is the desk: what is on its menu,
+  about 29K -- room for a few programs at a time.
+Ctrl+F4 takes a copy off the shelf and puts it on the desk.
+Removing a file from RAM (Ctrl+F4, Tab, Del) clears it off
+the desk; the shelf copy is untouched. VirtualT keeps the
+desk as you left it -- in M100RAM.BIN on the card, saved
+every 2 minutes and on Ctrl+Esc -- like a PC that hibernates.
+Programs you write or SAVE on the desk stay on the desk;
+Ctrl+F3 (EXPORT) copies them out to the card.
+
+FILES IN /virtualt
+------------------
+M100ROM.BIN   Model 100 ROM image (required)
+virtualt.cfg  Settings: WiFi, time zone (optional)
+T200ROM.BIN   Model 200 ROM image (only for the Model 200)
+m100/         Model 100 library: .BA .CO .DO files (see LIBRARY)
+m100/export/  What Ctrl+F3 writes (see EXPORT)
+m200/         Model 200 library, and m200/export/
+M100RAM.BIN   The Model 100's memory (written by VirtualT)
+M200RAM.BIN   The Model 200's memory, all three banks
+crashlog.txt  Written if VirtualT ever freezes (see below)
+lasttime.txt  Last known time, for when WiFi isn't available
+              (written by VirtualT)
+
+
+STARTUP
+-------
+The top line shows the build time, e.g. "VirtualT build
+20:34:20" (also on the Info panel). Quote it when reporting a
+problem. Under the Model 100 screen, a log shows each step:
+  WiFi / NTP   Joins your network, gets the time, then turns
+               the radio off. Takes a few seconds.
+  Countdown    "Model 100  2:M200  Esc:cold Enter:go (3)"
+               2 / 1  = run a Model 200 / Model 100 this
+                        time (model=200 in virtualt.cfg makes
+                        the Model 200 the default)
+               Esc    = start with a factory-fresh machine
+                        (the saved memory file is left alone
+                        until the next save overwrites it)
+               Enter  = skip the wait
+               nothing = after 3 seconds, restore memory
+  Memory       "restored from card" or "cold start". On a cold
+               start README.DO from the library is put on the
+               menu, if it is there: a short welcome with keys
+               and a few programs to type in.
+  Moved        Only once, after updating from a build that
+               loaded programs from virtualt/ itself: "Moved
+               N programs into virtualt/m100".
+  Clock        The time and where it came from.
+If all went well the log disappears after 3 seconds. If
+anything went wrong (shown in orange or magenta) it stays
+until you press Ctrl+F1.
+
+
+STATUS BAR AND PANELS
+---------------------
+The top line, once running:
+  M100  SHIFT CTRL GRPH CAPS  saved   87%
+SHIFT, CTRL and GRPH light up while the Model 100 sees them
+held; CAPS shows the PicoCalc's Caps Lock. "saved" turns to
+"unsaved" when files or programs have changed since the last
+save to the card. The battery shows "+" while charging.
+
+Ctrl+F1 cycles the area under the screen through:
+  Help   a short key reference
+  Info   build, speed, view, clock, memory and last save,
+         .BA results, battery, WiFi network
+  off    (blank)
+
+
+KEYS
+----
+Letters, numbers and punctuation type as on the Model 100.
+The Model 100 has no ` \ { } | ~ keys, so those do nothing.
+
+  PicoCalc            Model 100
+  --------            ---------
+  F1 - F5             F1 - F5
+  Shift+F1 - F3       F6 - F8
+  Shift+F4            LABEL
+  Shift+F5            PRINT
+  Alt (hold)          GRPH (graphics characters)
+  Ctrl                CTRL
+  Backspace           BKSP
+  Del                 DEL
+  Shift+Up / Down     Shift+Up / Down (PgUp / PgDn)
+  Shift+Enter         Shift+Enter
+  Shift+Tab           PASTE
+  Shift+Del           PAUSE
+  Shift+Esc           BREAK  (Ctrl+C also stops BASIC)
+  Esc                 ESC
+
+  Ctrl+F1             Help / Info panel / off
+                      (Space, Enter or Esc also closes it)
+  Ctrl+F2             Save the screen's raw state to
+                      virtualt/screen.bin (for bug reports)
+  Ctrl+F3             Export files to the card (see EXPORT)
+  Ctrl+F4             Library: load programs, remove files
+                      from RAM (see LIBRARY)
+  Ctrl+F5             Switch text / pixel view
+  Ctrl+Esc            Save memory and exit to the SD menu
+
+Not available yet: CODE (international characters). While
+Alt is held, the PicoCalc keyboard does not send B , . or
+Space, so GRPH with those keys can't be typed.
+
+
+THE SCREEN
+----------
+Text view (default): characters the Model 100 ROM printed are
+drawn with a sharp PicoCalc font; the graphics characters
+(GRPH) come from the ROM. Anything a program draws with dots
+(PSET, LINE, machine code) shows as real pixels, scaled, in
+just the character cells it touches.
+
+Pixel view (Ctrl+F5): the whole Model 100 screen, pixel for
+pixel, stretched to fit. Uneven stroke widths are normal here.
+
+The Info panel (Ctrl+F1 twice) shows how many cells are
+currently drawn as pixels, and the emulator's spare capacity:
+anything above 1.00x keeps up with a real Model 100.
+
+
+THE MODEL 200
+-------------
+The Model 200 has a 40x16 screen, which fills most of the
+PicoCalc's display (320x256). Its three RAM banks, Multiplan
+and the "Bank" key on its menu all work, and all three banks
+are saved to M200RAM.BIN. Under its screen there is room for
+three lines; the Help and Info panels (Ctrl+F1) are drawn over
+the Model 200 screen while they are showing, and the screen
+comes back when you press Ctrl+F1 again to close them.
+
+Most Model 100 programs don't run on a Model 200 (different
+memory layout and ROM routines) -- plain BASIC usually does.
+That's why its programs live in their own m200 folder.
+
+
+LIBRARY
+-------
+Ctrl+F4 opens the library: the .BA, .CO, .DO (and .100,
+.200, .BAS) files in
+virtualt/m100 (Model 200: virtualt/m200, loaded into the bank
+you are in), with each file's size and "in RAM" beside the ones
+already loaded. The top line shows the memory free.
+  Up / Down              choose a file
+  Shift+Up / Shift+Down  a page at a time
+  Enter                  load it into RAM
+  Tab                    switch to the files in RAM, and back
+  Del                    (RAM view) remove a file from RAM
+  Esc (or Ctrl+F4)       close
+The panel stays open so you can load several. If you were at
+the main menu, it is redrawn when you close the panel, so the
+new files show. Nothing is loaded at startup: the memory saved
+on the card keeps what you loaded for next time.
+
+Tab switches the panel to what is in RAM (the current bank on a
+Model 200), with each file's size. There, Del (or Backspace)
+removes the selected file from RAM after a Y to confirm -- the
+copy in the library is not touched. This only works from the main
+menu, since moving memory under a running program would wreck it.
+KILL "NAME.BA" in BASIC still works too.
+
+.BA files can be tokenized (as BASIC saves them) or plain-text
+listings, which is how most of the Club 100 library and other
+archives have them; listings are tokenized the way BASIC does
+when you type the lines in. Downloads can go in as they are:
+.100, .200 and .BAS files are listed too and load as NAME.BA,
+and lines of instructions before the first numbered line are
+skipped. .DOC files load as NAME.DO (programs such as STARF
+open their instructions that way). .CO files keep their usual
+6-byte header, so a program that does LOADM "NAME.CO" finds
+them.
+Listings and .DO text files can have Unix, DOS or old Mac (CR
+only) line ends.
+
+Messages after Enter: "not enough memory", "directory full",
+"not a BASIC program" (a listing line without a line number,
+or a damaged file), "not a .CO program" (the header's length
+doesn't match the file), "already in RAM".
+
+
+SOUND
+-----
+BEEP, SOUND and programs' beeps and clicks play through the
+headphone jack (and the speakers, if yours work), the same
+note in both ears. sound=off in virtualt.cfg turns it off.
+
+
+POWER
+-----
+Like the real machine, the Model 100 switches itself off after
+about 10 minutes without a key press (at the menu, in BASIC,
+TEXT and so on -- not while a program is running). VirtualT
+then saves memory, blanks the Model 100 screen and shows
+"Model 100 is off". Press any key to switch it back on: it
+carries on where it was. To stop it switching off, type
+POWER CONT in BASIC; POWER 100 restores the 10 minutes.
+
+
+SAVING
+------
+The Model 100's memory (files, BASIC programs, TEXT
+documents) is saved to M100RAM.BIN (Model 200:
+M200RAM.BIN) when you exit with Ctrl+Esc, and every 2 minutes
+if anything changed. Turning the PicoCalc off with the switch
+can lose up to 2 minutes of work; Ctrl+Esc first is the safe
+way out.
+
+To start over, delete M100RAM.BIN or press Esc during the
+startup countdown.
+
+
+EXPORT
+------
+Ctrl+F3 copies every file in the Model 100's memory to the
+virtualt/m100/export folder on the card, replacing what an earlier
+export put there:
+  NAME.BA    BASIC program, tokenized -- loads into VirtualT
+             on a PC, or back into this one from the library
+  NAME.BAS   the same program as a plain-text listing
+  NAME.DO    text files (TEXT documents, BASIC data files)
+  NAME.CO    machine-code programs
+On a Model 200 each RAM bank goes to its own folder:
+virtualt/m200/export/bank1, bank2 and bank3.
+
+The library doesn't list the export folder. To load an exported
+file again, copy it up into virtualt/m100 (or virtualt/m200).
+
+
+SETTINGS (virtualt.cfg)
+-----------------------
+Plain text, one setting per line, # starts a comment.
+
+  ssid=YourNetwork
+  password=YourWiFiPassword
+  tz=PST8PDT,M3.2.0,M11.1.0
+  ntp=pool.ntp.org
+  model=100            (or 200 to start a Model 200)
+  sound=on             (or off)
+
+tz is a POSIX time zone string. Examples:
+  US Eastern   EST5EDT,M3.2.0,M11.1.0
+  US Central   CST6CDT,M3.2.0,M11.1.0
+  US Mountain  MST7MDT,M3.2.0,M11.1.0
+  Arizona      MST7
+  US Pacific   PST8PDT,M3.2.0,M11.1.0   (default)
+  UK           GMT0BST,M3.5.0/1,M10.5.0
+
+ssid and password need a Pico 2 W; WiFi must be 2.4 GHz
+WPA2. If WiFi isn't set up or doesn't answer, the clock
+carries on from lasttime.txt. On the very first run with no
+WiFi the clock starts unset -- set it with TIME$ and DATE$
+in BASIC, and it is remembered from then on.
+
+The Model 100's own TIME$ and DATE$ work as usual after
+startup; NTP sets the clock again on the next launch.
+
+
+COMPARED WITH VIRTUALT ON A PC
+------------------------------
+Speed: always the speed of a real Model 100 (2.4576 MHz).
+VirtualT's speed settings are gone on purpose. Games, the
+cursor blink and key repeat are all timed by the Model 100's
+own clock, so running faster just makes them misbehave. The
+PicoCalc has about 2-3 times the power it needs, and the spare
+time is spent idling, which saves battery.
+
+Included:     Model 100 and Model 200 (with its three RAM
+              banks and Multiplan), keyboard, screen, sound,
+              BASIC, TEXT, TELCOM/ADDRSS/SCHEDL menus, clock,
+              saved memory.
+Different:    SOUND 0, which programs use as a rest or a tick,
+              is just a click as on a real Model 100 (VirtualT
+              on a PC beeps). Programs that work the speaker bit
+              themselves keep their duty cycle, so volume tricks
+              such as CHIME.200's fading bell come through.
+Planned:      nothing big at the moment; see KNOWN LIMITS.
+Could come:   Model 102 (nearly the same machine; needs its
+              ROM), option ROMs such as Ultimate ROM II or
+              TS-DOS, a TPDD disk drive that uses the SD card,
+              printing to a text file on the card, serial
+              port / TELCOM over WiFi.
+Not planned:  NEC PC-8201A / PC-8300, Kyocera KC-85, Olivetti
+              M10; memory expansions (ReMem, Rampac, REX,
+              QUAD); the IDE (assembler, linker, projects);
+              debugger, disassembler, memory editor and
+              register windows; the socket remote-control
+              interface. Use VirtualT on a PC for those and
+              bring the results over as .BA files.
+
+
+IF IT FREEZES
+-------------
+If VirtualT itself ever stops responding for 8 seconds, the
+PicoCalc restarts it automatically, and the startup log says
+what it was doing when it stopped ("Last run froze while
+..."). The same line is added to crashlog.txt -- please send
+that file along with any problem report.
+
+A frozen-looking screen whose clock has stopped is usually
+the Model 100's own auto power-off instead -- see POWER.
+
+
+REPORTING A PROBLEM
+-------------------
+VirtualT is a hobby project, fixed when time allows, but bug
+reports are welcome. Please open an issue at
+
+  github.com/ctorkildson-netizen/picocalc-virtualt/issues
+
+(or post in the PicoCalc forum thread) with:
+
+1. The build time from the top line, e.g. "build 15:29:11".
+   Ctrl+F1 twice shows it on the Info panel too; a photo of
+   that panel is a good start, as it also shows the memory,
+   clock and WiFi state.
+2. Pico 2 or Pico 2 W, and Model 100 or Tandy 200.
+3. What you did, what you expected, and what happened --
+   with any message exactly as shown.
+4. The program, if it's one of yours or not in the included
+   set: the file itself, or where you got it.
+5. Files from virtualt/ on the SD card, if they apply:
+   crashlog.txt   if VirtualT froze and restarted
+   screen.bin     for a display problem: press Ctrl+F2 while
+                  the problem is on the screen
+   M100RAM.BIN    only if asked (it holds your files)
+
+Never include virtualt.cfg: it has your WiFi password.
+
+
+KNOWN LIMITS
+------------
+- No serial port, modem, cassette or printer.
+- CODE key not mapped; GRPH + B , . Space can't be typed.
+
+
+LICENCES
+--------
+The PicoCalc port is BSD 2-Clause (LICENSE). The VirtualT core
+is Copyright 2004 Stephen Hurd and Ken Pettit, under the BSD
+licence in LICENSE-VirtualT.txt. The PicoCalc drivers and shell
+header are Blair Leduc's. The programs in m100 and m200 belong
+to their authors, named in each file.

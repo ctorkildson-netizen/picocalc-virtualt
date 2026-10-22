@@ -1,0 +1,8 @@
+# Blair Leduc's drivers and shell header are pinned submodules; Dependabot
+# opens a pull request when a new upstream release appears.
+version: 2
+updates:
+  - package-ecosystem: "gitsubmodule"
+    directory: "/"
+    schedule:
+      interval: "weekly"

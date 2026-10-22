@@ -1,0 +1,255 @@
+PROGRAMS FOR VIRTUALT
+=====================
+(Best read in a fixed-width font, such as Consolas or Courier
+New in Notepad: Format > Font.)
+
+VirtualT comes with 55 Model 100 and Tandy 200 programs,
+all run and checked on a PicoCalc. They are in the m100 and m200
+folders of the download: copy those folders into virtualt/ on the
+SD card. To load one, start VirtualT, press Ctrl+F4, pick it and
+press Enter (VIRTUALT.TXT, QUICK START, has the whole walk-through).
+Load a program's .DO or .DOC file too if it has one.
+
+Almost all of them come from the CompuServe M100SIG library of
+the 1980s, kept today at web8201.net and linked from Club 100
+(club100.org), which has thousands more. The authors' names and
+comments are left as they wrote them. Where we fixed something,
+a line starting "2026:" near the top says what; everything else
+is unchanged. If you wrote one of these and would rather it
+weren't included, open an issue on the project page and it will
+be removed.
+
+Many of these programs expect capital letters. If one ignores
+your Y or N, press Caps Lock. Where a program says F6, F7 or F8,
+press Shift+F1, F2 or F3 on the PicoCalc.
+
+
+START HERE
+----------
+SOL31C   Solitaire with real card faces.             (m100)
+ROG      A real little Rogue.                        (m100)
+LIFE     Conway's Life on the whole screen.     (m100, m200)
+MURDER   Clue crossed with Mastermind.               (m100)
+POKER    Draw poker against five bluffers.           (m100)
+OTHELO   Othello against the computer.               (m100)
+INVADR   Space Invaders.                             (m100)
+GREED    The dice game also called Farkle.           (m100)
+SUBWAR   Submarine against destroyer.                (m200)
+QUEST1   A one-maze dungeon quest.                   (m200)
+
+
+MODEL 100 (m100)
+----------------
+GAMES
+
+BLKJAK.BA    Tim Lockwood, 1985. A Las Vegas quarter machine.
+ + BLKJAK.DOC Bet, then h hit, s stand, d double.
+
+CHESS.BA     Mike Weiblen, 1985, with an opening book added in
+             2026, so its first moves are instant. Moves as from-to
+             squares (E2E4) and Enter; K and Q castle, P passes.
+
+CRIBGE.BA    James McGreevy, 1986. Cribbage to 121, scored
+ + CRIBGE.DOC correctly. Number keys pick cards, G is Go. Count
+             your own hands: miss points and it calls MUGGINS.
+             Its discards take about 30 seconds.
+
+DRAGON.BA    Barry Robinson, 1985. Gold, a Ring, Smaug and the
+             Arkenstone over three cave levels. Arrows move, U/D
+             change level. The Balrog kills without warning.
+
+ELIZA.BA     Jack Shalom, 1985. The 1966 psychotherapist: type a
+             sentence, it turns it around.
+
+GREED.BA     Joe Wasserman, 1987. Six dice: 1s, 5s and triples
+ + GREED.DOC score; bank or roll again, and a scoreless roll
+             loses the turn. Up takes a triple, Left a 1, Right a
+             5, Down rolls, Enter banks.
+
+HIQ.BA       Michael Martell, 1985. Peg solitaire: type a peg
+             (D2), then an arrow for the jump.
+
+INVADR.BA    James Yi, 1986. A row of aliens sweeps and descends.
+             , and . move, Space fires; 4 waves, 5 lives. Menu
+             keys are lowercase. Shots cost points.
+
+LANDER.BA    Randy Cassingham, 1983. A small graphic lander;
+ + LANDER.DOC thrust 0-9 stays set until you change it.
+
+LEARN.BA     Frank Kienast, 1986. Twenty Questions that learns:
+ + ANIMAL.DO wrong guesses teach it a new question. Load both, press
+             1 and type ANIMAL, 3 plays, 5 saves before 6 quits.
+             Caps Lock on, no commas in answers.
+
+LIFE.BA      Written for VirtualT. Arrows move, Space flips a
+             cell, R random, C clear, Enter runs, any key stops,
+             Q quits. Says when the colony dies or freezes.
+
+LUNAR.BA     Jim Storer, 1969, BASIC by David Ahl: the original
+             lunar lander. Every 10 seconds, a burn rate.
+
+MAZE3D.BA    Tim Ekdom, 1984. Escape a 5x5x5 cube of rooms drawn
+             in perspective. N S E W U D move, F faces, * and ?
+             show where you are and the exit. Quit with F8.
+
+MICROI.BA    Mike Berro, 1983. "Micro-Invaders": one invader, its
+ + MICROI.DOC bombs falling in your column. , . move (< > by 5),
+             Space fires, Esc fires a homing laser. Capital Y/N.
+
+MURDER.BA    Benn Gibson, 1984. Name who, with what and where by
+             first letters (Enter lists them). Each wrong guess
+             rules one out, and the alibi clue clears two more if
+             you read it right. Any key skips the opening tune.
+
+OTHELO.BA    "jt", Don Zeikel, James Shelton, 1984-87. Caps Lock
+             off; moves are row then column (3d). About 20
+             seconds a move early on.
+
+POKER.BA     Karl Chase, 1984. Five-card draw, jacks to open,
+ + POKER.DOC against five opponents who bluff and false-draw. C
+             calls, F folds, a number raises; discards by
+             position (125), Enter stands pat.
+
+PONG.BA      Rick Perry, 1983. One paddle, a dropping ceiling.
+             Esc 1 Space = Backspace jump the paddle; 2 - nudge.
+
+QZ-100.BA    Bill Templeton, 1987. True/false quizzes, 24 questions
+ + ARTS.DO   each, against the clock: Disney, arts, boxing, horse
+ + BOXING.DO racing. Load the quiz files with it. The facts are
+ + DISNEY.DO 1987's, which is half the fun.
+ + HORSES.DO
+
+ROG.BA       Willard Goosey, 1998-2016 (GPL). Random dungeons,
+             monsters a-z, Body/Mind/Soul stats that double as
+             spell points. h j k l (or arrows), y u b n diagonals,
+             > < stairs; z Mind attack, p prayer, a heal, s saves.
+
+SHARKS.BA    Ray Yeargin, 1985. Wa-Tor: fish and sharks breed,
+ + SHARKS.DOC hunt and starve. Try 40 8 80 10 3 3 4 3 1 1 at the
+             questions; lowercase t shows the tally.
+
+SOL31C.BA    Philip Avery, 2015. Klondike with real card faces,
+ + SOLCR3.CO drawn by a machine-code routine: load both. I and O
+             move, P picks up, D drops, N next card, F foundation.
+
+STARF.BA     Mike Berro, 1983. Enemies fly in from the right; your
+ + STARFI.DOC laser hits the nearest in your row. Arrows move,
+             Space or - fires, P pauses. Capital Y/N. Load
+             STARFI.DOC for its instructions.
+
+TOOLS
+
+ALARMS.BA    Rick Perry, 1984. A background alarm that beeps
+             wherever you are (F1 time, F2 on). Don't use it with
+             machine-code programs such as SOLCR3.CO.
+
+CARTPT.BA    J. Holovacs, 1987. Plots x,y data from the keyboard
+ + CARTPT.DOC or a .DO file (a two-column CSV works); linear or
+ + GROW.DO   log scales. F2 replots, F3 exits.
+
+CHIMES.BA    Paul Carnell, 1983. A Regulator wall clock with
+             Westminster chimes; keys 1-4 chime now. F8 menu.
+
+DBNEW.BA     Bob Ripley, 1984. A flat-file database in a .DO file:
+ + DBNEW.DOC sort, search, totals, labels. Try it on DBTEST.DO.
+ + DBTEST.DO
+
+FACTRL.BA    A 1987 contest one-liner: 1!, 2!, 3! ... exactly.
+
+FUNPLT.BA    James Scales, 1988. Plots X=F(Z), Y=F(Z): graphs and
+             curves. Keep the numbers modest.
+
+HP35.BA      Larry Reddig, 1987. The original HP-35, RPN, x only.
+
+HPCALC.BA    Scott Schad, 1987 (shareware). An HP-41-style RPN
+ + HPCALC.DOC calculator; Up/Down pick function rows.
+
+KEPLER.BA    Don Sakers, 1988. Builds habitable planets and star
+ + KEPLER.DOC systems for science fiction writers. Caps Lock off.
+
+LOGIC.BA     J. Holovacs, 1986. Logic-circuit simulator with
+ + LOGIC.DOC AND/OR/XOR/NAND/NOR gates. T, F, U in capitals.
+
+RPNCAL.BA    Terry Morgan, 1984. A full four-level RPN calculator
+ + RPNCAL.DOC with stats and registers. Caps Lock on.
+
+SNOOZR.BA    Bob Luley, 1984. Alarm clock playing the 1812
+             Overture; Space snoozes.
+
+SPREAD.BA    Woods Martin, 1986. A real little spreadsheet, 20 x 19
+ + SPRTST.DO cells, with @SUM @AVG @MIN @MAX and more. Wants about
+             24K free, so remove other programs first.
+
+SYLCAT.BA    Paul Globman, 1990. Checks syllogisms: "all men are
+             mortal" style premises, then a conclusion.
+
+TYPING.BA    St. Petersburg Police Department, 1984. A typing
+ + TYPING.DOC tutor that names the finger for every key; types
+ + TEST.DO   from TEST.DO. Record to beat: 13 wpm.
+
+VIBES.BA     Machine Design, 1986. Masses on springs, Runge-Kutta.
+
+WMAP.BA      An interactive world map: arrows move, L shows the
+             place and its local time, S/D measure distance. Set
+             XZ=-5 in line 18 to your time zone (-8 Pacific).
+
+WORLD.BA     Henry Glover, 1989. A world map; 1 adds time zones.
+
+
+
+TANDY 200 (m200)
+----------------
+
+CHIME.BA     A bell that fades away. Run MKCHIM once to build
+ + MKCHIM.BA CHIME.CO, then CHIME asks for pitch and duration.
+
+CLOCK2.BA    An analog clock, white for a.m., black for p.m.
+             Caps Lock off: c ticks, a alarm, s set, t time.
+
+CLONES.BA    Fred Brown. Grab the $ before the clones catch you;
+             Space makes you safe for three moves.
+
+FLYING.BA    Graphics demo.
+
+FRACTL.BA    Fractals, slowly.
+
+LIFE.BA      As on the Model 100, on a 40x15 field; G loads
+             Gosper's glider gun.
+
+OTHELL.BA    Othello. Answers in capitals.
+
+QUEST1.BA    Fred Brown, 1988. A dungeon quest: tavern, 101 rooms,
+             a dragon and a crown. Buy armor and a weapon first,
+             F5 saves. Caps Lock on.
+
+SCROLL.BA    James Yi, 1986. Scrolls the screen a pixel row at a
+             time by reprogramming the LCD. Any key ends it.
+
+SHT200.BA    Curtis Karnow. Land the Space Shuttle. Arrows set
+             angle and turn, G gear, S/C spoilers. Keep the gear up
+             and dive 5-8 degrees; flatten only at the end.
+             Shift+Esc stops it afterwards.
+
+SLOTS.BA     Leo Finkelstein Jr. A slot machine with graphics and
+             a running win/loss chart. Number keys bet.
+
+SOLIT.BA     Klondike in graphics characters. Arrows move, N
+             deals, P picks up, D drops, F foundation.
+
+SUBWAR.BA    Fred Brown, 1987. Submarine against destroyer, real
+             time, with periscope, sonar and depth charges. Caps
+             Lock on; Y at the start for instructions.
+
+
+
+ALSO WORTH A LOOK (not included)
+--------------------------------
+These work too, but their authors asked that they not be passed
+on, so get them from the M100SIG library yourself:
+
+CLOCK.PMS    Peter Stanwyck, 1986. A watch face with sweeping
+             hands, alarm, timer and stopwatch. Rename to
+             CLOCK.BA. M returns to the menu.
+
+NAV2.BAS     Gary Van Balen, 1991. A highway trip log with ETAs
+ + NAV2.DOC  for each milestone; make the map file in TEXT first.

@@ -1,0 +1,8 @@
+# virtualt.cfg -- copy to virtualt/ on the SD card and edit.
+# Lines starting with # are ignored. Everything here is optional.
+#ssid=YourNetwork
+#password=YourWiFiPassword
+#tz=PST8PDT,M3.2.0,M11.1.0
+#ntp=pool.ntp.org
+#model=100
+#sound=on

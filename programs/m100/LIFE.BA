@@ -1,0 +1,58 @@
+1 'LIFE.BA - Conway's Game of Life for the Model 100/102 and Tandy 200
+2 '(Martin Gardner, Scientific American, Oct 1970). 2026, public domain.
+3 'Edges wrap: 40x7 on the 100, 40x15 on the 200 (G there: glider gun).
+10 DEFINT A-Z:Q=0:I=0:TN=0:U=0:M=0:V=0:A=0:B=0:Z=0:Y=0:LP=0:NP=0:CLS:W=40:H=7:IF PEEK(1)=171 THEN H=15
+20 N=W*H:S=N:DIM K(N-1),T(N-1),L(N-1),C(N-1),R(H+1),X(W+1)
+30 FOR I=0 TO H+1:R(I)=((I-1+H) MOD H)*W:NEXT
+40 FOR I=0 TO W+1:X(I)=(I-1+W) MOD W:NEXT
+60 B$="O":P=(H\2)*W+W\2:GOSUB 800
+100 PRINT@S,"Arrows Space R)nd C)lr Q)uit Enter=go ";
+110 PRINT@P,CHR$(27)"p"MID$(" "+B$,C(P)+1,1)CHR$(27)"q";
+120 A$=INPUT$(1):A=ASC(A$):PRINT@P,MID$(" "+B$,C(P)+1,1);
+130 IF A=28 THEN P=P+1:IF P=N THEN P=0
+140 IF A=29 THEN P=P-1:IF P<0 THEN P=N-1
+150 IF A=30 THEN P=P-W:IF P<0 THEN P=P+N
+160 IF A=31 THEN P=P+W:IF P>=N THEN P=P-N
+170 IF A=32 THEN C(P)=1-C(P)
+180 IF A$="R" OR A$="r" THEN FOR I=0 TO N-1:C(I)=-(RND(1)<.2):NEXT:GOSUB 800:GOTO 100
+190 IF A$="C" OR A$="c" THEN FOR I=0 TO N-1:C(I)=0:NEXT:GOSUB 800:GOTO 100
+195 IF (A$="G" OR A$="g") AND H>7 THEN GOSUB 850:GOSUB 800:GOTO 100
+200 IF A$="Q" OR A$="q" THEN CLS:END
+210 IF A=13 THEN 300
+220 GOTO 110
+300 LP=0:G=0:FOR I=0 TO N-1:IF C(I) THEN L(LP)=I:LP=LP+1
+310 NEXT:PRINT@S,SPACE$(39);:IF LP=0 THEN 100
+330 TN=0:CH=0:FOR I=0 TO LP-1:Q=L(I):Y=Q\W:Z=Q-Y*W:U=R(Y):M=Y*W:V=R(Y+2):A=X(Z):B=X(Z+2)
+341 Q=U+A:IF K(Q) THEN K(Q)=K(Q)+1 ELSE K(Q)=1:T(TN)=Q:TN=TN+1
+342 Q=U+Z:IF K(Q) THEN K(Q)=K(Q)+1 ELSE K(Q)=1:T(TN)=Q:TN=TN+1
+343 Q=U+B:IF K(Q) THEN K(Q)=K(Q)+1 ELSE K(Q)=1:T(TN)=Q:TN=TN+1
+344 Q=M+A:IF K(Q) THEN K(Q)=K(Q)+1 ELSE K(Q)=1:T(TN)=Q:TN=TN+1
+345 Q=M+B:IF K(Q) THEN K(Q)=K(Q)+1 ELSE K(Q)=1:T(TN)=Q:TN=TN+1
+346 Q=V+A:IF K(Q) THEN K(Q)=K(Q)+1 ELSE K(Q)=1:T(TN)=Q:TN=TN+1
+347 Q=V+Z:IF K(Q) THEN K(Q)=K(Q)+1 ELSE K(Q)=1:T(TN)=Q:TN=TN+1
+348 Q=V+B:IF K(Q) THEN K(Q)=K(Q)+1 ELSE K(Q)=1:T(TN)=Q:TN=TN+1
+349 NEXT
+360 NP=0:FOR I=0 TO LP-1:Q=L(I):A=K(Q):IF A=2 OR A=3 THEN L(NP)=Q:NP=NP+1 ELSE C(Q)=0:CH=1:PRINT@Q," ";
+370 NEXT
+380 FOR I=0 TO TN-1:Q=T(I):IF K(Q)=3 THEN IF C(Q)=0 THEN C(Q)=1:L(NP)=Q:NP=NP+1:CH=1:PRINT@Q,B$;
+390 K(Q)=0:NEXT
+400 LP=NP:G=G+1:PRINT@S,"Gen";G;" Pop";LP;"  any key=edit  ";
+410 IF LP=0 THEN PRINT@S,"Died out after";G;"generations     ";:GOTO 450
+420 IF CH=0 THEN PRINT@S,"Still life after";G;"generations   ";:GOTO 450
+430 IF INKEY$<>"" THEN 100
+440 GOTO 330
+450 A$=INPUT$(1):GOTO 100
+800 CLS:FOR I=0 TO N-1:IF C(I) THEN PRINT@I,B$;
+810 NEXT:RETURN
+850 FOR I=0 TO N-1:C(I)=0:NEXT:RESTORE 870:FOR Y=0 TO 8:READ A$
+860 FOR Z=1 TO LEN(A$):IF MID$(A$,Z,1)="O" THEN C((Y+2)*W+Z+1)=1
+865 NEXT Z,Y:RETURN
+870 DATA "........................O"
+871 DATA "......................O.O"
+872 DATA "............OO......OO............OO"
+873 DATA "...........O...O....OO............OO"
+874 DATA "OO........O.....O...OO"
+875 DATA "OO........O...O.OO....O.O"
+876 DATA "..........O.....O.......O"
+877 DATA "...........O...O"
+878 DATA "............OO"
