@@ -20,7 +20,7 @@
 #include "pico/cyw43_arch.h"
 #include "lwip/apps/sntp.h"
 #include "pico/aon_timer.h"
-#include "drivers/fat32.h"
+#include "drivers/filesystem.h"
 #include "vt_config.h"
 
 #define CFG_PATH  "/virtualt/virtualt.cfg"
@@ -50,13 +50,13 @@ static void set_str(char *dst, size_t n, const char *v)
 int vt_config_load(void)
 {
 	static char buf[2048];
-	fat32_file_t f;
-	size_t n = 0;
+	FIL f;
+	UINT n = 0;
 
-	if (fat32_open(&f, CFG_PATH) != FAT32_OK)
+	if (f_open(&f, CFG_PATH, FA_READ) != FR_OK)
 		return 0;
-	fat32_read(&f, buf, sizeof buf - 1, &n);
-	fat32_close(&f);
+	f_read(&f, buf, sizeof buf - 1, &n);
+	f_close(&f);
 	buf[n] = 0;
 
 	for (char *line = strtok(buf, "\n"); line; line = strtok(NULL, "\n"))
@@ -92,13 +92,13 @@ void vt_sntp_set_time(unsigned long sec)
 
 static void restore_saved_time(void)
 {
-	fat32_file_t f;
+	FIL f;
 	char buf[32];
-	size_t n = 0;
-	if (fat32_open(&f, TIME_PATH) != FAT32_OK)
+	UINT n = 0;
+	if (f_open(&f, TIME_PATH, FA_READ) != FR_OK)
 		return;
-	fat32_read(&f, buf, sizeof buf - 1, &n);
-	fat32_close(&f);
+	f_read(&f, buf, sizeof buf - 1, &n);
+	f_close(&f);
 	buf[n] = 0;
 	long long t = atoll(buf);
 	if (t > 1600000000LL)
@@ -115,13 +115,12 @@ void vt_time_save(void)
 		return;     /* never learned the time: don't save garbage */
 	char buf[32];
 	int len = snprintf(buf, sizeof buf, "%lld\n", (long long)now);
-	fat32_file_t f;
-	size_t w;
-	fat32_delete(TIME_PATH);
-	if (fat32_create(&f, TIME_PATH) != FAT32_OK)
+	FIL f;
+	UINT w;
+	if (f_open(&f, TIME_PATH, FA_WRITE | FA_CREATE_ALWAYS) != FR_OK)
 		return;
-	fat32_write(&f, buf, len, &w);
-	fat32_close(&f);
+	f_write(&f, buf, len, &w);
+	f_close(&f);
 }
 
 /* The RP2350's always-on (POWMAN) timer runs from the crystal and is

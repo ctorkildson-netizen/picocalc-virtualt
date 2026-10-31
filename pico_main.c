@@ -31,7 +31,7 @@
 #include "hardware/pio.h"
 #include "hardware/clocks.h"
 #include "drivers/southbridge.h"
-#include "drivers/fat32.h"
+#include "drivers/filesystem.h"
 #include "drivers/keyboard.h"
 #include "drivers/font.h"
 #include "picocalc_shell.h"
@@ -322,12 +322,12 @@ void show_error(const char *s) { strncpy(g_err, s, sizeof g_err - 1); }
 
 int platform_load_rom(uchar *buf, int len)
 {
-	fat32_file_t f;
-	size_t n = 0;
-	if (fat32_open(&f, ROM_PATH) != FAT32_OK)
+	FIL f;
+	UINT n = 0;
+	if (f_open(&f, ROM_PATH, FA_READ) != FR_OK)
 		return 0;
-	fat32_read(&f, buf, len, &n);
-	fat32_close(&f);
+	f_read(&f, buf, len, &n);
+	f_close(&f);
 	return (int)n;
 }
 
@@ -777,11 +777,11 @@ static int load_prog(const char *name, uint32_t size, const char **what)
 	if (vt_find_file(mt)) { *what = "already in RAM"; return 0; }
 	if (size == 0 || size > 32768) { *what = "wrong size"; return VT_BASIC_BAD; }
 	snprintf(path, sizeof path, "%s/%s", LIB_DIR, name);
-	fat32_file_t f;
-	size_t n = 0;
-	if (fat32_open(&f, path) != FAT32_OK) { *what = "can't open"; return VT_BASIC_BAD; }
-	fat32_read(&f, babuf, size, &n);
-	fat32_close(&f);
+	FIL f;
+	UINT n = 0;
+	if (f_open(&f, path, FA_READ) != FR_OK) { *what = "can't open"; return VT_BASIC_BAD; }
+	f_read(&f, babuf, size, &n);
+	f_close(&f);
 	if (n != size) { *what = "read error"; return VT_BASIC_BAD; }
 	int r = type == 0x80 ? load_ba(babuf, (int)n, mt) : load_codo(babuf, (int)n, mt, type);
 	if (r < 0)
@@ -795,22 +795,22 @@ static int load_prog(const char *name, uint32_t size, const char **what)
    into virtualt/m100 once (copy, check, then delete the original) */
 static void migrate_loose(void)
 {
-	fat32_file_t dir;
-	fat32_entry_t e;
+	DIR dir;
+	static FILINFO e;
 	int moved = 0, failed = 0;
 	static char names[64][41];
 	static uint32_t sizes[64];
 	int n = 0;
 
-	if (fat32_open(&dir, BA_DIR) != FAT32_OK)
+	if (f_opendir(&dir, BA_DIR) != FR_OK)
 		return;
-	while (n < 64 && fat32_dir_read(&dir, &e) == FAT32_OK && e.filename[0])
-		if (!(e.attr & FAT32_ATTR_DIRECTORY) && prog_type(e.filename) && strlen(e.filename) <= 40)
+	while (n < 64 && f_readdir(&dir, &e) == FR_OK && e.fname[0])
+		if (!(e.fattrib & AM_DIR) && prog_type(e.fname) && strlen(e.fname) <= 40)
 		{
-			strcpy(names[n], e.filename);
-			sizes[n++] = e.size;
+			strcpy(names[n], e.fname);
+			sizes[n++] = (uint32_t)e.fsize;
 		}
-	fat32_close(&dir);
+	f_closedir(&dir);
 	if (!n)
 		return;
 	vt_host_mkdir(BA_DIR "/m100");
@@ -819,24 +819,20 @@ static void migrate_loose(void)
 		char from[64], to[64];
 		snprintf(from, sizeof from, BA_DIR "/%s", names[i]);
 		snprintf(to, sizeof to, BA_DIR "/m100/%s", names[i]);
-		fat32_file_t f;
-		size_t got = 0, put = 0;
-		int ok = sizes[i] <= 32768 && fat32_open(&f, from) == FAT32_OK;
-		if (ok) { fat32_read(&f, babuf, sizes[i], &got); fat32_close(&f); ok = got == sizes[i]; }
-		if (ok)
+		FIL f;
+		UINT got = 0, put = 0;
+		int ok = sizes[i] <= 32768 && f_open(&f, from, FA_READ) == FR_OK;
+		if (ok) { f_read(&f, babuf, sizes[i], &got); f_close(&f); ok = got == sizes[i]; }
+		if (ok && f_stat(to, NULL) == FR_OK) ok = 0;   /* never overwrite */
+		if (ok && f_open(&f, to, FA_WRITE | FA_CREATE_ALWAYS) == FR_OK)
 		{
-			fat32_file_t check;
-			if (fat32_open(&check, to) == FAT32_OK) { fat32_close(&check); ok = 0; }   /* never overwrite */
-		}
-		if (ok && fat32_create(&f, to) == FAT32_OK)
-		{
-			if (got) fat32_write(&f, babuf, got, &put);
-			fat32_close(&f);
+			if (got) f_write(&f, babuf, got, &put);
+			f_close(&f);
 			ok = put == got;
 		}
 		else
 			ok = 0;
-		if (ok && fat32_delete(from) == FAT32_OK)
+		if (ok && f_unlink(from) == FR_OK)
 			moved++;
 		else
 			failed++;
@@ -862,21 +858,21 @@ static uint16_t lib_msg_colour;
 
 static void lib_scan(void)
 {
-	fat32_file_t dir;
-	fat32_entry_t e;
+	DIR dir;
+	static FILINFO e;
 	lib_n = lib_skipped = 0;
 	vt_host_mkdir(LIB_DIR);
-	if (fat32_open(&dir, LIB_DIR) != FAT32_OK)
+	if (f_opendir(&dir, LIB_DIR) != FR_OK)
 		return;
-	while (fat32_dir_read(&dir, &e) == FAT32_OK && e.filename[0])
+	while (f_readdir(&dir, &e) == FR_OK && e.fname[0])
 	{
-		if ((e.attr & FAT32_ATTR_DIRECTORY) || !prog_type(e.filename))
+		if ((e.fattrib & AM_DIR) || !prog_type(e.fname))
 			continue;
-		if (lib_n == LIB_MAX || strlen(e.filename) > 40) { lib_skipped++; continue; }
-		strcpy(lib_names[lib_n], e.filename);
-		lib_sizes[lib_n++] = e.size;
+		if (lib_n == LIB_MAX || strlen(e.fname) > 40) { lib_skipped++; continue; }
+		strcpy(lib_names[lib_n], e.fname);
+		lib_sizes[lib_n++] = (uint32_t)e.fsize;
 	}
-	fat32_close(&dir);
+	f_closedir(&dir);
 	/* alphabetical, ignoring case */
 	for (int i = 1; i < lib_n; i++)
 		for (int j = i; j > 0 && strcasecmp(lib_names[j - 1], lib_names[j]) > 0; j--)
@@ -1109,17 +1105,17 @@ static uint32_t saved_hash;
    one byte saying which is switched in. */
 static int pc_load_ram(void)
 {
-	fat32_file_t f;
-	size_t n = 0;
-	if (fat32_open(&f, RAM_PATH) != FAT32_OK)
+	FIL f;
+	UINT n = 0;
+	if (f_open(&f, RAM_PATH, FA_READ) != FR_OK)
 		return 0;
 	if (is200)
 	{
 		uint8_t bank = 0;
-		size_t nb = 0;
-		fat32_read(&f, rambanks, 3 * 24576, &n);
-		fat32_read(&f, &bank, 1, &nb);
-		fat32_close(&f);
+		UINT nb = 0;
+		f_read(&f, rambanks, 3 * 24576, &n);
+		f_read(&f, &bank, 1, &nb);
+		f_close(&f);
 		if (n != 3 * 24576)
 		{
 			memset(rambanks, 0, 3 * 24576);
@@ -1128,8 +1124,8 @@ static int pc_load_ram(void)
 		vt_load_ram_banks(bank);
 		return 1;
 	}
-	fat32_read(&f, &gBaseMemory[32768], 32768, &n);
-	fat32_close(&f);
+	f_read(&f, &gBaseMemory[32768], 32768, &n);
+	f_close(&f);
 	if (n != 32768)
 	{
 		memset(&gBaseMemory[32768], 0, 32768);
@@ -1145,31 +1141,30 @@ static void pc_save_ram(int force)
 	uint32_t h = ram_hash();
 	if (!force && h == saved_hash)
 		return;
-	fat32_file_t f;
-	size_t w = 0, w2 = 0;
+	FIL f;
+	UINT w = 0, w2 = 0;
 	int want;
-	fat32_delete(RAM_NEW);
-	if (fat32_create(&f, RAM_NEW) != FAT32_OK)
+	if (f_open(&f, RAM_NEW, FA_WRITE | FA_CREATE_ALWAYS) != FR_OK)
 		return;
 	if (is200)
 	{
 		uint8_t bank = gRamBank;
 		vt_sync_ram_banks();
-		fat32_write(&f, rambanks, 3 * 24576, &w);
-		fat32_write(&f, &bank, 1, &w2);
+		f_write(&f, rambanks, 3 * 24576, &w);
+		f_write(&f, &bank, 1, &w2);
 		w += w2;
 		want = 3 * 24576 + 1;
 	}
 	else
 	{
-		fat32_write(&f, &gBaseMemory[32768], 32768, &w);
+		f_write(&f, &gBaseMemory[32768], 32768, &w);
 		want = 32768;
 	}
-	fat32_close(&f);
+	f_close(&f);
 	if ((int)w != want)
 		return;
-	fat32_delete(RAM_PATH);
-	if (fat32_rename(RAM_NEW, RAM_PATH) == FAT32_OK)
+	f_unlink(RAM_PATH);
+	if (f_rename(RAM_NEW, RAM_PATH) == FR_OK)
 	{
 		saved_hash = h;
 		time_t now = time(NULL);
@@ -1219,27 +1214,24 @@ static int esc_pressed(int row)
 
 /* ------------------------------------------------ export to the card */
 
-static fat32_file_t exp_file;
+static FIL exp_file;
 int vt_host_create(const char *path, vt_file_t *f)
 {
-	fat32_delete(path);                     /* overwrite an earlier export */
-	if (fat32_create(&exp_file, path) != FAT32_OK)
+	if (f_open(&exp_file, path, FA_WRITE | FA_CREATE_ALWAYS) != FR_OK)
 		return 0;
 	*f = &exp_file;
 	return 1;
 }
 int vt_host_write(vt_file_t f, const void *d, int n)
 {
-	size_t w = 0;
-	fat32_write((fat32_file_t *)f, d, n, &w);
+	UINT w = 0;
+	f_write((FIL *)f, d, n, &w);
 	return (int)w;
 }
-void vt_host_close(vt_file_t f) { fat32_close((fat32_file_t *)f); }
+void vt_host_close(vt_file_t f) { f_close((FIL *)f); }
 void vt_host_mkdir(const char *path)
 {
-	fat32_file_t d;
-	if (fat32_dir_create(&d, path) == FAT32_OK)
-		fat32_close(&d);
+	f_mkdir(path);			/* (FR_EXIST if it's there) */
 }
 
 static int exp_fail;
@@ -1357,12 +1349,12 @@ static void report_last_crash(void)
 
 	/* append to /virtualt/crashlog.txt */
 	static char buf[4096];
-	fat32_file_t f;
-	size_t n = 0, w;
-	if (fat32_open(&f, BA_DIR "/crashlog.txt") == FAT32_OK)
+	FIL f;
+	UINT n = 0, w;
+	if (f_open(&f, BA_DIR "/crashlog.txt", FA_READ) == FR_OK)
 	{
-		fat32_read(&f, buf, sizeof buf - 200, &n);
-		fat32_close(&f);
+		f_read(&f, buf, sizeof buf - 200, &n);
+		f_close(&f);
 	}
 	time_t now = time(NULL);
 	struct tm lt;
@@ -1371,11 +1363,10 @@ static void report_last_crash(void)
 	if (now > 1600000000) strftime(when, sizeof when, "%Y-%m-%d %H:%M", &lt);
 	n += snprintf(buf + n, sizeof buf - n, "%s  build %s  froze while %s after %us, PC=%04X\r\n",
 	              when, __TIME__, ph < sizeof phase_name / sizeof phase_name[0] ? phase_name[ph] : "?", up, pc & 0xFFFF);
-	fat32_delete(BA_DIR "/crashlog.txt");
-	if (fat32_create(&f, BA_DIR "/crashlog.txt") == FAT32_OK)
+	if (f_open(&f, BA_DIR "/crashlog.txt", FA_WRITE | FA_CREATE_ALWAYS) == FR_OK)
 	{
-		fat32_write(&f, buf, n, &w);
-		fat32_close(&f);
+		f_write(&f, buf, n, &w);
+		f_close(&f);
 	}
 }
 
@@ -1401,7 +1392,7 @@ int main(void)
 {
 	sb_init();
 	lcd_init();
-	fat32_init();
+	fs_init();
 	lcd_enable_cursor(false);
 	lcd_set_font(&font_8x10);
 	lcd_clear_screen();
@@ -1471,14 +1462,14 @@ int main(void)
 	{
 		/* a fresh machine: put README.DO from the library on the menu, so
 		   a new user has something to read first */
-		fat32_file_t f;
-		size_t n = 0;
+		FIL f;
+		UINT n = 0;
 		char rp[64];
 		snprintf(rp, sizeof rp, "%s/README.DO", LIB_DIR);
-		if (fat32_open(&f, rp) == FAT32_OK)
+		if (f_open(&f, rp, FA_READ) == FR_OK)
 		{
-			fat32_read(&f, babuf, 32768, &n);
-			fat32_close(&f);
+			f_read(&f, babuf, 32768, &n);
+			f_close(&f);
 			if (n && !vt_find_file("README DO") && load_codo(babuf, (int)n, "README DO", 0xC0) > 0 && at_menu())
 			{
 				for (const char *q = "basic"; *q; q++) tap_char(*q);
